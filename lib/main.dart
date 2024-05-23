@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
 import 'package:tast_management_app/view/screen_home.dart';
 
+import 'view/login_and_registration/screen_login.dart';
 import 'view/login_and_registration/screen_registration.dart';
 
 void main() {
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.latoTextTheme(),
         useMaterial3: false,
       ),
-      home: ScreenRegistration(),
+      home: ScreenLogin(),
       debugShowCheckedModeBanner: false,
     );
   }
