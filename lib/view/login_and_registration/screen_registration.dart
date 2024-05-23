@@ -58,6 +58,7 @@ class ScreenRegistration extends StatelessWidget {
                   TextFieldWidget(
                     controller: _passwordController,
                     hintText: 'Password',
+                    obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Password is required';
