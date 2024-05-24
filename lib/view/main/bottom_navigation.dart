@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tast_management_app/utils/color_consts.dart';
 
 ValueNotifier selectedIndexNotifier = ValueNotifier(0);
 
@@ -14,14 +15,15 @@ class BottomNavigation extends StatelessWidget {
             selectedIndex: newIndex,
             onDestinationSelected: (value) =>
                 selectedIndexNotifier.value = value,
-            backgroundColor: Colors.blueAccent[50],
+            backgroundColor: kWhiteColor,
+            indicatorColor: kCardColor.withOpacity(0.8),
             destinations: const [
               NavigationDestination(
                 icon: Icon(Icons.home),
                 label: 'Home',
               ),
               NavigationDestination(
-                icon: Icon(Icons.task_alt),
+                icon: Icon(Icons.cancel),
                 label: 'Task',
               ),
               NavigationDestination(

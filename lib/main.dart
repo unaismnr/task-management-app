@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
           seedColor: kMainColor,
         ),
         textTheme: GoogleFonts.latoTextTheme(),
-        useMaterial3: true,
+        useMaterial3: false,
       ),
       home: ScreenMain(),
       debugShowCheckedModeBanner: false,

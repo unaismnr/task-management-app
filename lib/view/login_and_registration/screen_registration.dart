@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tast_management_app/services/auth_service.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
+import 'package:tast_management_app/view/common/space_sizedbox.dart';
 import 'package:tast_management_app/view/login_and_registration/screen_login.dart';
 import 'package:tast_management_app/view/home/screen_home.dart';
 
@@ -20,9 +21,6 @@ class ScreenRegistration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final space = SizedBox(
-      height: MediaQuery.of(context).size.height * .02,
-    );
     return SafeArea(
       child: Scaffold(
         body: Center(
@@ -45,7 +43,7 @@ class ScreenRegistration extends StatelessWidget {
                       fontSize: 15,
                     ),
                   ),
-                  space,
+                  const SpaceSizedBox(),
                   TextFieldWidget(
                       controller: _emailController,
                       hintText: 'Email',
@@ -59,7 +57,7 @@ class ScreenRegistration extends StatelessWidget {
                         }
                         return null;
                       }),
-                  space,
+                  const SpaceSizedBox(),
                   TextFieldWidget(
                     controller: _passwordController,
                     hintText: 'Password',
@@ -74,7 +72,7 @@ class ScreenRegistration extends StatelessWidget {
                       return null;
                     },
                   ),
-                  space,
+                  const SpaceSizedBox(),
                   ElevatedButtonWidget(
                     text: "SUBMIT",
                     onpressed: () {
@@ -88,7 +86,7 @@ class ScreenRegistration extends StatelessWidget {
                       }
                     },
                   ),
-                  space,
+                  const SpaceSizedBox(),
                   BottomTextWidget(
                     accountConfirmText: "Do you already have an account?",
                     onTap: () {

@@ -10,6 +10,11 @@ class ScreenSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
+        centerTitle: true,
+        elevation: 0,
+      ),
       body: Center(
         child: TextButton.icon(
           onPressed: () {
@@ -27,17 +32,3 @@ class ScreenSettings extends StatelessWidget {
     );
   }
 }
-
-// TextButton(
-//           onPressed: () {
-//             _auth.signOut();
-//             Navigator.of(context).pushReplacement(
-//               MaterialPageRoute(
-//                 builder: (context) => ScreenLogin(),
-//               ),
-//             );
-//           },
-//           child: const Text(
-//             'SignOut',
-//           ),
-//         ),

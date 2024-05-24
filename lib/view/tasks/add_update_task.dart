@@ -2,13 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tast_management_app/services/tasks_service.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
-import 'package:tast_management_app/utils/other_consts.dart';
+import 'package:tast_management_app/view/common/space_sizedbox.dart';
+import 'package:intl/intl.dart';
 
 class AddUpdateTask extends StatefulWidget {
-  const AddUpdateTask({
-    super.key,
-    this.taskData,
-  });
+  const AddUpdateTask({super.key, this.taskData});
 
   final QueryDocumentSnapshot? taskData;
 
@@ -20,127 +18,186 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
   final taskService = TaskService();
   final GlobalKey<FormState> _formKey = GlobalKey();
 
-  late TextEditingController admissionController;
-  late TextEditingController nameController;
-  late TextEditingController attendanceController;
-  late TextEditingController leaveController;
+  late TextEditingController titleController;
+  late TextEditingController descriptionController;
+  late TextEditingController expTimeController;
+  late ValueNotifier<DateTime?> _dueDateNotifier;
+  late ValueNotifier<bool?> _isTaskCompletedNotifier;
 
   @override
   void initState() {
     super.initState();
-    admissionController =
+    titleController =
         TextEditingController(text: widget.taskData?['admission'] ?? '');
-    nameController =
+    descriptionController =
         TextEditingController(text: widget.taskData?['name'] ?? '');
-    attendanceController =
+    expTimeController =
         TextEditingController(text: widget.taskData?['attendance'] ?? '');
-    leaveController =
-        TextEditingController(text: widget.taskData?['leave'] ?? '');
+    _dueDateNotifier = ValueNotifier<DateTime?>(null);
+    _isTaskCompletedNotifier = ValueNotifier<bool>(
+      widget.taskData?['completionStatus'] ?? false,
+    );
   }
 
   @override
   void dispose() {
-    admissionController.dispose();
-    nameController.dispose();
-    attendanceController.dispose();
-    leaveController.dispose();
+    titleController.dispose();
+    descriptionController.dispose();
+    expTimeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          title: Text(
-            widget.taskData == null ? 'Add Task' : 'Edit Task',
-            style: TextStyle(
-              color: Theme.of(context).textTheme.bodyMedium!.color,
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        title: Text(
+          widget.taskData == null ? 'Add Task' : 'Edit Task',
+          style: const TextStyle(
+            color: kWhiteColor,
           ),
-          centerTitle: true,
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: IntrinsicHeight(
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: kWhiteColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        spreadRadius: 0,
-                      )
-                    ]),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      TextFieldContainer(
-                        textController: admissionController,
-                        hintText: 'Addmission No',
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 20,
+          ),
+          child: IntrinsicHeight(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: kWhiteColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.07),
+                      blurRadius: 10,
+                      spreadRadius: 0,
+                    )
+                  ]),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFieldContainer(
+                      textController: titleController,
+                      hintText: 'Title',
+                    ),
+                    const SpaceSizedBox(),
+                    TextFieldContainer(
+                      textController: descriptionController,
+                      hintText: 'Descriptiion',
+                    ),
+                    const SpaceSizedBox(),
+                    TextFieldContainer(
+                      textController: expTimeController,
+                      hintText: 'Expected Task Duration in Hours',
+                      keyboard: TextInputType.number,
+                    ),
+                    TextButton.icon(
+                      onPressed: () async {
+                        final selectedDateTemp = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 30),
+                          ),
+                        );
+                        if (selectedDateTemp == null) {
+                          return;
+                        } else {
+                          _dueDateNotifier.value = selectedDateTemp;
+                        }
+                      },
+                      icon: const Icon(Icons.date_range_rounded),
+                      label: ValueListenableBuilder(
+                          valueListenable: _dueDateNotifier,
+                          builder: (context, dueTime, _) {
+                            return Text(
+                              dueTime == null
+                                  ? 'Select Due Date'
+                                  : DateFormat.yMMMd().format(dueTime),
+                            );
+                          }),
+                    ),
+                    ValueListenableBuilder(
+                        valueListenable: _isTaskCompletedNotifier,
+                        builder: (context, isTaskCompleted, _) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Is Task Completed?',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  _isTaskCompletedNotifier.value = true;
+                                },
+                                icon: Icon(
+                                  Icons.task_alt,
+                                  color: isTaskCompleted == true
+                                      ? Colors.green
+                                      : kBlackColor,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  _isTaskCompletedNotifier.value = false;
+                                },
+                                icon: Icon(
+                                  Icons.cancel_outlined,
+                                  color: isTaskCompleted == false
+                                      ? Colors.red
+                                      : kBlackColor,
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          widget.taskData == null
+                              ? addStudent()
+                              : editStudent(widget.taskData!.id);
+                          Navigator.pop(context);
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.check_circle_outline,
+                        color: kWhiteColor,
                       ),
-                      kHeight10,
-                      TextFieldContainer(
-                        textController: nameController,
-                        hintText: 'Name',
-                        keyboardType: TextInputType.name,
-                      ),
-                      kHeight10,
-                      TextFieldContainer(
-                        textController: attendanceController,
-                        hintText: 'Attendance',
-                      ),
-                      kHeight10,
-                      TextFieldContainer(
-                        textController: leaveController,
-                        hintText: 'Leave',
-                      ),
-                      kHeight20,
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            widget.taskData == null
-                                ? addStudent()
-                                : editStudent(widget.taskData!.id);
-                            Navigator.pop(context);
-                          }
-                        },
-                        icon: const Icon(
-                          Icons.check_circle_outline,
+                      label: const Text(
+                        'ADD TASK',
+                        style: TextStyle(
+                          fontSize: 17,
                           color: kWhiteColor,
                         ),
-                        label: const Text(
-                          'ADD TASK',
-                          style: TextStyle(
-                            fontSize: 17,
-                            color: kWhiteColor,
-                          ),
+                      ),
+                      style: ButtonStyle(
+                        elevation: const MaterialStatePropertyAll(0),
+                        backgroundColor:
+                            const MaterialStatePropertyAll(kMainColor),
+                        minimumSize: MaterialStatePropertyAll(
+                          Size(MediaQuery.of(context).size.width,
+                              MediaQuery.of(context).size.height * 0.065),
                         ),
-                        style: ButtonStyle(
-                          elevation: const MaterialStatePropertyAll(0),
-                          backgroundColor:
-                              const MaterialStatePropertyAll(kMainColor),
-                          minimumSize: MaterialStatePropertyAll(
-                            Size(MediaQuery.of(context).size.width,
-                                MediaQuery.of(context).size.height * 0.065),
-                          ),
-                          shape: const MaterialStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(10),
-                              ),
+                        shape: const MaterialStatePropertyAll(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10),
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -151,39 +208,31 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
   }
 
   void addStudent() {
-    final admission = admissionController.text.trim();
-    final name = nameController.text.trim();
-    final attendance = attendanceController.text.trim();
-    final leave = leaveController.text.trim();
-    if (admission.isEmpty) {
+    final title = titleController.text.trim();
+    final description = descriptionController.text.trim();
+    final expTime = expTimeController.text.trim();
+    if (title.isEmpty) {
       return;
     }
-    if (name.isEmpty) {
+    if (description.isEmpty) {
       return;
     }
-    if (attendance.isEmpty) {
-      return;
-    }
-    if (leave.isEmpty) {
+    if (expTime.isEmpty) {
       return;
     }
   }
 
   void editStudent(docId) {
-    final admission = admissionController.text.trim();
-    final name = nameController.text.trim();
-    final attendance = attendanceController.text.trim();
-    final leave = leaveController.text.trim();
-    if (admission.isEmpty) {
+    final title = titleController.text.trim();
+    final description = descriptionController.text.trim();
+    final expTime = expTimeController.text.trim();
+    if (title.isEmpty) {
       return;
     }
-    if (name.isEmpty) {
+    if (description.isEmpty) {
       return;
     }
-    if (attendance.isEmpty) {
-      return;
-    }
-    if (leave.isEmpty) {
+    if (expTime.isEmpty) {
       return;
     }
   }
@@ -194,12 +243,12 @@ class TextFieldContainer extends StatelessWidget {
     super.key,
     required this.textController,
     required this.hintText,
-    this.keyboardType = TextInputType.number,
+    this.keyboard = TextInputType.text,
   });
 
   final TextEditingController textController;
   final String hintText;
-  final TextInputType keyboardType;
+  final TextInputType keyboard;
 
   @override
   Widget build(BuildContext context) {
@@ -221,13 +270,13 @@ class TextFieldContainer extends StatelessWidget {
         style: const TextStyle(
           color: kBlackColor,
         ),
-        keyboardType: keyboardType,
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Please Enter Details';
           }
           return null;
         },
+        keyboardType: keyboard,
       ),
     );
   }
