@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tast_management_app/services/auth_service.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
+import 'package:tast_management_app/view/login_and_registration/screen_login.dart';
+import 'package:tast_management_app/view/screen_home.dart';
 
 import 'widgets/bottom_text_widget.dart';
 import 'widgets/elevated_button_widget.dart';
@@ -9,6 +12,8 @@ class ScreenRegistration extends StatelessWidget {
   ScreenRegistration({super.key});
 
   final GlobalKey<FormState> _formKey = GlobalKey();
+
+  final _auth = AuthService();
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -73,15 +78,26 @@ class ScreenRegistration extends StatelessWidget {
                   ElevatedButtonWidget(
                     text: "SUBMIT",
                     onpressed: () {
-                      String email = _emailController.text.trim();
-                      String password = _passwordController.text.trim();
-                      if (_formKey.currentState!.validate()) {}
+                      if (_formKey.currentState!.validate()) {
+                        addReg();
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => ScreenHome(),
+                          ),
+                        );
+                      }
                     },
                   ),
                   space,
                   BottomTextWidget(
                     accountConfirmText: "Do you already have an account?",
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ScreenLogin(),
+                        ),
+                      );
+                    },
                     loginRegisterText: "Login",
                   ),
                 ],
@@ -91,5 +107,18 @@ class ScreenRegistration extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void addReg() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+    if (email.isEmpty) {
+      return;
+    }
+    if (password.isEmpty) {
+      return;
+    }
+
+    await _auth.createUserWithEmailAndPassword(email, password);
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tast_management_app/services/auth_service.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
+import 'package:tast_management_app/view/login_and_registration/screen_registration.dart';
+import 'package:tast_management_app/view/screen_home.dart';
 
 import 'widgets/bottom_text_widget.dart';
 import 'widgets/elevated_button_widget.dart';
@@ -9,6 +12,8 @@ class ScreenLogin extends StatelessWidget {
   ScreenLogin({super.key});
 
   final GlobalKey<FormState> _formKey = GlobalKey();
+
+  final _auth = AuthService();
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -58,6 +63,7 @@ class ScreenLogin extends StatelessWidget {
                   TextFieldWidget(
                     controller: _passwordController,
                     hintText: 'Password',
+                    obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Enter a valid password';
@@ -72,15 +78,26 @@ class ScreenLogin extends StatelessWidget {
                   ElevatedButtonWidget(
                     text: "LOGIN",
                     onpressed: () {
-                      String email = _emailController.text.trim();
-                      String password = _passwordController.text.trim();
-                      if (_formKey.currentState!.validate()) {}
+                      if (_formKey.currentState!.validate()) {
+                        addLog();
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => ScreenHome(),
+                          ),
+                        );
+                      }
                     },
                   ),
                   space,
                   BottomTextWidget(
                     accountConfirmText: "Don't you have an account?",
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ScreenRegistration(),
+                        ),
+                      );
+                    },
                     loginRegisterText: "Register",
                   ),
                 ],
@@ -90,5 +107,17 @@ class ScreenLogin extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void addLog() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+    if (email.isEmpty) {
+      return;
+    }
+    if (password.isEmpty) {
+      return;
+    }
+    await _auth.loginUserWithEmailAndPassword(email, password);
   }
 }

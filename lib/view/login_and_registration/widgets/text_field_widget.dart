@@ -34,6 +34,11 @@ class TextFieldWidget extends StatelessWidget {
               color: kMainColor,
             ),
           ),
+          focusedErrorBorder: const OutlineInputBorder(
+            borderSide: BorderSide(
+              color: kMainColor,
+            ),
+          ),
           errorBorder: const OutlineInputBorder(
             borderSide: BorderSide(
               color: kMainColor,

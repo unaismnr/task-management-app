@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
-import 'package:tast_management_app/view/screen_home.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 import 'view/login_and_registration/screen_login.dart';
-import 'view/login_and_registration/screen_registration.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
