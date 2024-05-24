@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tast_management_app/services/auth_service.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
 import 'package:tast_management_app/view/login_and_registration/screen_registration.dart';
-import 'package:tast_management_app/view/screen_home.dart';
+import 'package:tast_management_app/view/home/screen_home.dart';
 
 import 'widgets/bottom_text_widget.dart';
 import 'widgets/elevated_button_widget.dart';
