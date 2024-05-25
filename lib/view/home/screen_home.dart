@@ -56,7 +56,7 @@ class ScreenHome extends StatelessWidget {
                           color: kWhiteColor,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withOpacity(0.07),
                               blurRadius: 10,
                               spreadRadius: 0,
                             )

@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tast_management_app/services/notification_service.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tast_management_app/view/main/screen_main.dart';
+import 'package:tast_management_app/view/login_and_registration/screen_login.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.latoTextTheme(),
         useMaterial3: false,
       ),
-      home: ScreenMain(),
+      home: ScreenLogin(),
       debugShowCheckedModeBanner: false,
     );
   }

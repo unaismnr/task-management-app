@@ -3,7 +3,7 @@ import 'package:tast_management_app/services/auth_service.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
 import 'package:tast_management_app/view/common/space_sizedbox.dart';
 import 'package:tast_management_app/view/login_and_registration/screen_login.dart';
-import 'package:tast_management_app/view/home/screen_home.dart';
+import 'package:tast_management_app/view/main/screen_main.dart';
 
 import 'widgets/bottom_text_widget.dart';
 import 'widgets/elevated_button_widget.dart';
@@ -80,7 +80,7 @@ class ScreenRegistration extends StatelessWidget {
                         addReg();
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
-                            builder: (context) => ScreenHome(),
+                            builder: (context) => ScreenMain(),
                           ),
                         );
                       }
