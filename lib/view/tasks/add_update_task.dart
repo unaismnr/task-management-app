@@ -1,14 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tast_management_app/models/task_model.dart';
 import 'package:tast_management_app/services/tasks_service.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
 import 'package:tast_management_app/view/common/space_sizedbox.dart';
 import 'package:intl/intl.dart';
 
 class AddUpdateTask extends StatefulWidget {
-  const AddUpdateTask({super.key, this.taskData});
+  const AddUpdateTask({super.key, this.taskData, this.id});
 
-  final QueryDocumentSnapshot? taskData;
+  final String? id;
+  final TaskModel? taskData;
 
   @override
   State<AddUpdateTask> createState() => _AddUpdateTaskState();
@@ -27,15 +28,26 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
   @override
   void initState() {
     super.initState();
-    titleController =
-        TextEditingController(text: widget.taskData?['admission'] ?? '');
-    descriptionController =
-        TextEditingController(text: widget.taskData?['name'] ?? '');
-    expTimeController =
-        TextEditingController(text: widget.taskData?['attendance'] ?? '');
-    _dueDateNotifier = ValueNotifier<DateTime?>(null);
+    titleController = TextEditingController(
+      text: widget.taskData?.title ?? '',
+    );
+    descriptionController = TextEditingController(
+      text: widget.taskData?.description ?? '',
+    );
+    expTimeController = TextEditingController(
+      text: widget.taskData?.expTaskDuration ?? '',
+    );
+    DateTime? dueDate;
+    if (widget.taskData?.dueDate != null) {
+      dueDate = DateFormat('MMM d, yyyy h:mm a').parse(
+        widget.taskData!.dueDate,
+      );
+    }
+    _dueDateNotifier = ValueNotifier<DateTime?>(
+      dueDate,
+    );
     _isTaskCompletedNotifier = ValueNotifier<bool>(
-      widget.taskData?['completionStatus'] ?? false,
+      widget.taskData?.completionStatus ?? false,
     );
   }
 
@@ -45,6 +57,40 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
     descriptionController.dispose();
     expTimeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDueDate(BuildContext context) async {
+    final DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: _dueDateNotifier.value ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
+    );
+
+    if (selectedDate == null) {
+      return;
+    }
+
+    if (context.mounted) {
+      final TimeOfDay? selectedTime = await showTimePicker(
+        context: context,
+        initialTime:
+            TimeOfDay.fromDateTime(_dueDateNotifier.value ?? DateTime.now()),
+      );
+      if (selectedTime == null) {
+        return;
+      }
+
+      final DateTime combinedDateTime = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        selectedTime.hour,
+        selectedTime.minute,
+      );
+
+      _dueDateNotifier.value = combinedDateTime;
+    }
   }
 
   @override
@@ -100,19 +146,7 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
                     ),
                     TextButton.icon(
                       onPressed: () async {
-                        final selectedDateTemp = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(
-                            const Duration(days: 30),
-                          ),
-                        );
-                        if (selectedDateTemp == null) {
-                          return;
-                        } else {
-                          _dueDateNotifier.value = selectedDateTemp;
-                        }
+                        _selectDueDate(context);
                       },
                       icon: const Icon(Icons.date_range_rounded),
                       label: ValueListenableBuilder(
@@ -121,7 +155,8 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
                             return Text(
                               dueTime == null
                                   ? 'Select Due Date'
-                                  : DateFormat.yMMMd().format(dueTime),
+                                  : DateFormat('MMM d, yyyy h:mm a')
+                                      .format(dueTime),
                             );
                           }),
                     ),
@@ -142,8 +177,8 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
                                 icon: Icon(
                                   Icons.task_alt,
                                   color: isTaskCompleted == true
-                                      ? Colors.green
-                                      : kBlackColor,
+                                      ? kGreenColor
+                                      : kGreyColor,
                                 ),
                               ),
                               IconButton(
@@ -153,8 +188,8 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
                                 icon: Icon(
                                   Icons.cancel_outlined,
                                   color: isTaskCompleted == false
-                                      ? Colors.red
-                                      : kBlackColor,
+                                      ? kRedColor
+                                      : kGreyColor,
                                 ),
                               ),
                             ],
@@ -164,9 +199,8 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           widget.taskData == null
-                              ? addStudent()
-                              : editStudent(widget.taskData!.id);
-                          Navigator.pop(context);
+                              ? addStudent(context)
+                              : editStudent(widget.id);
                         }
                       },
                       icon: const Icon(
@@ -207,7 +241,7 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
     );
   }
 
-  void addStudent() {
+  void addStudent(BuildContext context) {
     final title = titleController.text.trim();
     final description = descriptionController.text.trim();
     final expTime = expTimeController.text.trim();
@@ -220,6 +254,17 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
     if (expTime.isEmpty) {
       return;
     }
+    final task = TaskModel(
+      title: title,
+      description: description,
+      dueDate: DateFormat('MMM d, yyyy h:mm a').format(
+        _dueDateNotifier.value!,
+      ),
+      completionStatus: _isTaskCompletedNotifier.value!,
+      expTaskDuration: expTime,
+    );
+    taskService.addTask(task);
+    Navigator.pop(context);
   }
 
   void editStudent(docId) {
@@ -235,6 +280,17 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
     if (expTime.isEmpty) {
       return;
     }
+    final task = TaskModel(
+      title: title,
+      description: description,
+      dueDate: DateFormat('MMM d, yyyy h:mm a').format(
+        _dueDateNotifier.value!,
+      ),
+      completionStatus: _isTaskCompletedNotifier.value!,
+      expTaskDuration: expTime,
+    );
+    taskService.updateTask(docId, task);
+    Navigator.pop(context);
   }
 }
 

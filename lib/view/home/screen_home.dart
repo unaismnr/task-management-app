@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tast_management_app/models/task_model.dart';
 import 'package:tast_management_app/services/tasks_service.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
+import 'package:tast_management_app/view/tasks/add_update_task.dart';
 
 class ScreenHome extends StatelessWidget {
   ScreenHome({super.key});
@@ -32,7 +34,7 @@ class ScreenHome extends StatelessWidget {
                     color: kMainColor,
                   ),
                 );
-              } else if (snapshot.data!.docs.isEmpty) {
+              } else if (snapshot.data!.isEmpty) {
                 return const Center(
                   child: Text('No Data'),
                 );
@@ -43,17 +45,12 @@ class ScreenHome extends StatelessWidget {
               } else if (snapshot.hasData) {
                 return ListView.separated(
                   physics: const ClampingScrollPhysics(),
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: snapshot.data!.length,
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
-                    final taskData = snapshot.data!.docs[index];
+                    final taskData = snapshot.data![index];
                     return Container(
-                      padding: const EdgeInsets.only(
-                        left: 15,
-                        right: 15,
-                        top: 10,
-                        bottom: 5,
-                      ),
+                      padding: const EdgeInsets.only(top: 5, bottom: 10),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: kWhiteColor,
@@ -64,59 +61,71 @@ class ScreenHome extends StatelessWidget {
                               spreadRadius: 0,
                             )
                           ]),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  taskData['title'],
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                'Due: ${taskData['deadline']}',
-                                style: const TextStyle(
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ],
+                      child: ListTile(
+                        title: Text(
+                          taskData.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(taskData['description']),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              taskData.description,
+                              style: const TextStyle(
+                                color: kGreyColor,
                               ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(
-                                      Icons.task_alt,
-                                      color:
-                                          taskData['completionStatus'] == true
-                                              ? Colors.green
-                                              : Colors.grey,
-                                    ),
-                                    tooltip:
-                                        taskData['completionStatus'] == true
-                                            ? 'Task Completed'
-                                            : 'Task Not Completed',
-                                  ),
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: const Icon(Icons.edit_note_rounded),
-                                  ),
-                                ],
-                              ),
-                            ],
+                            ),
+                            Text(
+                              'Due Date: ${taskData.dueDate}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              'Exp Time: ${taskData.expTaskDuration} Hours',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Is Task Completed?',
+                                ),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.02,
+                                ),
+                                Icon(
+                                  Icons.task_alt,
+                                  color: taskData.completionStatus == true
+                                      ? kGreenColor
+                                      : kGreyColor,
+                                ),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.01,
+                                ),
+                                Icon(
+                                  Icons.cancel_outlined,
+                                  color: taskData.completionStatus == false
+                                      ? kRedColor
+                                      : kGreyColor,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          onPressed: () {
+                            customBottomSheet(context, taskData.id!, taskData);
+                          },
+                          icon: const Icon(
+                            Icons.more_vert,
                           ),
-                        ],
+                        ),
                       ),
                     );
                   },
@@ -132,6 +141,93 @@ class ScreenHome extends StatelessWidget {
               );
             }),
       ),
+      floatingActionButton: FloatingActionButton(
+        elevation: 0,
+        backgroundColor: kMainColor,
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const AddUpdateTask(),
+            ),
+          );
+        },
+        tooltip: 'Add Task',
+        child: const Icon(Icons.add, size: 35),
+      ),
     );
+  }
+
+  Future<dynamic> customBottomSheet(
+    BuildContext context,
+    String docId,
+    TaskModel taskData,
+  ) {
+    return showModalBottomSheet(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        context: context,
+        builder: (context) => SizedBox(
+              height: MediaQuery.of(context).size.height / 3.7,
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.02,
+                  ),
+                  ListTile(
+                    leading: taskData.completionStatus
+                        ? const Icon(
+                            Icons.cancel_outlined,
+                          )
+                        : const Icon(
+                            Icons.task_alt,
+                          ),
+                    title: Text(
+                      taskData.completionStatus
+                          ? 'Marked as Not Completed'
+                          : 'Marked as Completed',
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _tasks.updateTaskStatus(
+                        docId,
+                        taskData.completionStatus ? false : true,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.edit,
+                    ),
+                    title: const Text(
+                      'Edit Task',
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddUpdateTask(
+                            id: docId,
+                            taskData: taskData,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.delete,
+                    ),
+                    title: const Text(
+                      'Delete Task',
+                    ),
+                    onTap: () {
+                      _tasks.deleteTask(docId);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+            ));
   }
 }

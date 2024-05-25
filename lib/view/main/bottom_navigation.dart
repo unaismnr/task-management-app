@@ -16,15 +16,11 @@ class BottomNavigation extends StatelessWidget {
             onDestinationSelected: (value) =>
                 selectedIndexNotifier.value = value,
             backgroundColor: kWhiteColor,
-            indicatorColor: kCardColor.withOpacity(0.8),
+            indicatorColor: const Color.fromARGB(255, 237, 244, 255),
             destinations: const [
               NavigationDestination(
                 icon: Icon(Icons.home),
                 label: 'Home',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.cancel),
-                label: 'Task',
               ),
               NavigationDestination(
                 icon: Icon(Icons.settings),
