@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tast_management_app/models/task_model.dart';
+import 'package:tast_management_app/services/notification_service.dart';
 import 'package:tast_management_app/services/tasks_service.dart';
 import 'package:tast_management_app/utils/color_consts.dart';
 import 'package:tast_management_app/view/common/space_sizedbox.dart';
@@ -200,7 +201,7 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
                         if (_formKey.currentState!.validate()) {
                           widget.taskData == null
                               ? addStudent(context)
-                              : editStudent(widget.id);
+                              : updateTask(widget.id);
                         }
                       },
                       icon: const Icon(
@@ -264,10 +265,19 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
       expTaskDuration: expTime,
     );
     taskService.addTask(task);
+
+    // Schedule the notification
+    NotificationService.scheduleNotification(
+      'Task Reminder',
+      'Your task "${task.title}" is due in 10 minutes!',
+      _dueDateNotifier.value!.subtract(
+        const Duration(minutes: 10),
+      ),
+    );
     Navigator.pop(context);
   }
 
-  void editStudent(docId) {
+  void updateTask(docId) {
     final title = titleController.text.trim();
     final description = descriptionController.text.trim();
     final expTime = expTimeController.text.trim();
@@ -290,6 +300,14 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
       expTaskDuration: expTime,
     );
     taskService.updateTask(docId, task);
+
+    // Schedule the notification
+    NotificationService.scheduleNotification(
+        'Task Reminder',
+        'Your task "${task.title}" is due in 10 minutes!',
+        _dueDateNotifier.value!.subtract(
+          const Duration(minutes: 10),
+        ));
     Navigator.pop(context);
   }
 }
