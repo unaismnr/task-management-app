@@ -65,7 +65,7 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
       context: context,
       initialDate: _dueDateNotifier.value ?? DateTime.now(),
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
+      lastDate: DateTime.now().add(const Duration(days: 60)),
     );
 
     if (selectedDate == null) {
@@ -75,8 +75,9 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
     if (context.mounted) {
       final TimeOfDay? selectedTime = await showTimePicker(
         context: context,
-        initialTime:
-            TimeOfDay.fromDateTime(_dueDateNotifier.value ?? DateTime.now()),
+        initialTime: TimeOfDay.fromDateTime(
+          _dueDateNotifier.value ?? DateTime.now(),
+        ),
       );
       if (selectedTime == null) {
         return;
@@ -269,7 +270,7 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
     // Schedule the notification
     NotificationService.scheduleNotification(
       'Task Reminder',
-      'Your task "${task.title}" is due in 10 minutes!',
+      'Your task "${task.title}" is due within 10 minutes!',
       _dueDateNotifier.value!.subtract(
         const Duration(minutes: 10),
       ),
@@ -304,7 +305,7 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
     // Schedule the notification
     NotificationService.scheduleNotification(
         'Task Reminder',
-        'Your task "${task.title}" is due in 10 minutes!',
+        'Your task "${task.title}" is due within 10 minutes!',
         _dueDateNotifier.value!.subtract(
           const Duration(minutes: 10),
         ));

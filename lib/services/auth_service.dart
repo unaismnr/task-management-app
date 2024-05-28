@@ -33,8 +33,8 @@ class AuthService {
       return credential.user;
     } catch (e) {
       log('Firebase Auth Login Error: $e');
+      throw Exception('An unknown error occurred');
     }
-    return null;
   }
 
   Future<void> signOut() async {
@@ -42,6 +42,19 @@ class AuthService {
       _auth.signOut();
     } catch (e) {
       log('Firebase Auth SignOut Error: $e');
+    }
+  }
+
+  Future<bool> isEmailRegistered(String email, String password) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return true;
+    } catch (e) {
+      log(e.toString());
+      return false;
     }
   }
 }

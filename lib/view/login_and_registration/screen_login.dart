@@ -19,6 +19,9 @@ class ScreenLogin extends StatelessWidget {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  final errorMessage = ValueNotifier<String>('');
+  final isLoading = ValueNotifier<bool>(false);
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -73,19 +76,20 @@ class ScreenLogin extends StatelessWidget {
                     },
                   ),
                   const SpaceSizedBox(),
-                  ElevatedButtonWidget(
-                    text: "LOGIN",
-                    onpressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        addLog();
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => ScreenMain(),
-                          ),
-                        );
-                      }
-                    },
-                  ),
+                  ValueListenableBuilder(
+                      valueListenable: isLoading,
+                      builder: (context, loading, _) {
+                        return loading
+                            ? const CircularProgressIndicator()
+                            : ElevatedButtonWidget(
+                                text: "LOGIN",
+                                onpressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    addLog(context);
+                                  }
+                                },
+                              );
+                      }),
                   const SpaceSizedBox(),
                   BottomTextWidget(
                     accountConfirmText: "Don't you have an account?",
@@ -98,6 +102,18 @@ class ScreenLogin extends StatelessWidget {
                     },
                     loginRegisterText: "Register",
                   ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.020,
+                  ),
+                  ValueListenableBuilder<String>(
+                    valueListenable: errorMessage,
+                    builder: (context, error, _) {
+                      return Text(
+                        error,
+                        style: const TextStyle(color: kRedColor),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -107,7 +123,7 @@ class ScreenLogin extends StatelessWidget {
     );
   }
 
-  void addLog() async {
+  void addLog(BuildContext context) async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     if (email.isEmpty) {
@@ -116,6 +132,21 @@ class ScreenLogin extends StatelessWidget {
     if (password.isEmpty) {
       return;
     }
-    await _auth.loginUserWithEmailAndPassword(email, password);
+    isLoading.value = true;
+    try {
+      errorMessage.value = '';
+      await _auth.loginUserWithEmailAndPassword(email, password);
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => ScreenMain(),
+            ),
+            (route) => false);
+      }
+    } catch (e) {
+      errorMessage.value = 'Wrong login details';
+    } finally {
+      isLoading.value = false;
+    }
   }
 }
