@@ -217,14 +217,14 @@ class _AddUpdateTaskState extends State<AddUpdateTask> {
                         ),
                       ),
                       style: ButtonStyle(
-                        elevation: const MaterialStatePropertyAll(0),
+                        elevation: const WidgetStatePropertyAll(0),
                         backgroundColor:
-                            const MaterialStatePropertyAll(kMainColor),
-                        minimumSize: MaterialStatePropertyAll(
+                            const WidgetStatePropertyAll(kMainColor),
+                        minimumSize: WidgetStatePropertyAll(
                           Size(MediaQuery.of(context).size.width,
                               MediaQuery.of(context).size.height * 0.065),
                         ),
-                        shape: const MaterialStatePropertyAll(
+                        shape: const WidgetStatePropertyAll(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(
                               Radius.circular(10),
